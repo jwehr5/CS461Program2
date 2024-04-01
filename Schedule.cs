@@ -15,12 +15,15 @@ namespace Program2
 
         private Random random;
 
-        public Schedule()
+        public Schedule(Random rand, bool shouldInitSchedule = true)
         {
-            individualSchedule = new ActivityAssignments();
+            this.random = rand;
+            individualSchedule = new ActivityAssignments(rand, shouldInitSchedule);
+            
+            
         }
 
-        public void CalculateFitness()
+        public double CalculateFitness()
         {
             double activityFitness;
             foreach(var activity in individualSchedule.listOfActivityAssignments)
@@ -42,10 +45,13 @@ namespace Program2
 
                 //Check on the facilitator load.
                 activityFitness += CheckFacilitatorLoad(activity);
+
+                //Check the criteria in the activity-specific adjustments section
+                activityFitness += CheckActivitySpecificAdjustments(activity);
                 Fitness += activityFitness;
             }
 
-            
+            return Fitness;
 
         }
 
@@ -320,10 +326,11 @@ namespace Program2
             bool onlyOneActivityAtAGivenTime = true;
             foreach(var comparingActivity in individualSchedule.listOfActivityAssignments)
             {
-                //Checking if the facilitator is assigned to another activty at the same time.
+                
                 if(currentActivity.Key != comparingActivity.Key)
                 {
-                    if(currentActivity.Value.Item2.Equals(comparingActivity.Value.Item2) && currentActivity.Value.Item3.Equals(comparingActivity.Value.Item3))
+                    //Checking if the facilitator is assigned to another activty at the same time.
+                    if (currentActivity.Value.Item2.Equals(comparingActivity.Value.Item2) && currentActivity.Value.Item3.Equals(comparingActivity.Value.Item3))
                     {
                         onlyOneActivityAtAGivenTime = false;
                     }
@@ -332,7 +339,32 @@ namespace Program2
                     {
                         activityCount++;
                     }
+
+                    //Checking if the faciliator is assigned to consecutive time slots.
+                    string time1 = currentActivity.Value.Item2;
+                    string time2 = comparingActivity.Value.Item2;
+
+                    //Calculate the time between the two activities.
+                    TimeSpan duration = DateTime.Parse(time1).Subtract(DateTime.Parse(time2));
+
+                    //Get the absolute value of the time.
+                    duration = duration.Duration();
+                    if (duration.ToString().Equals("01:00:00") && currentActivity.Value.Item3.Equals(comparingActivity.Value.Item3))
+                    {
+                        if((currentActivity.Value.Item1.Key.Equals("Roman") && comparingActivity.Value.Item1.Key.Equals("Beach"))
+                           || (currentActivity.Value.Item1.Key.Equals("Beach") && comparingActivity.Value.Item1.Key.Equals("Roman")))
+                        {
+                            sum += 0.5;
+                        }
+                        else
+                        {
+                            sum -= 0.4;
+                        }
+                    }
+
                 }
+
+                
             }
 
             if(activityCount > 4)
@@ -349,7 +381,99 @@ namespace Program2
                 sum -= 0.2;
             }
 
-            Console.WriteLine(sum);
+            //Console.WriteLine(sum);
+            return sum;
+        }
+
+        private double CheckActivitySpecificAdjustments(KeyValuePair<string, Tuple<KeyValuePair<string, int>, string, string>> currentActivity)
+        {
+            double sum = 0;
+
+            //Check to see if both sections of SLA100 and SLA191 are more than 4 hours apart or if they're in the same time slot.
+            if (currentActivity.Key.Equals("SLA100A") || currentActivity.Key.Equals("SLA191A"))
+            {
+                foreach(var comparingActivity in individualSchedule.listOfActivityAssignments)
+                {
+                    
+                    if ((currentActivity.Key.Equals("SLA100A") && comparingActivity.Key.Equals("SLA100B")) 
+                        || (currentActivity.Key.Equals("SLA191A") && comparingActivity.Key.Equals("SLA191B")))
+                    {
+                        string time1 = currentActivity.Value.Item2;
+                        string time2 = comparingActivity.Value.Item2;
+
+                        //Check if the two sections are in the same time slot.
+                        if (time1.Equals(time2))
+                        {
+                            sum -= 0.5;
+                        }
+                        else
+                        {
+                            //Calculate the time between the two activities.
+                            TimeSpan duration = DateTime.Parse(time1).Subtract(DateTime.Parse(time2));
+
+                            //Get the absolute value of the time.
+                            duration = duration.Duration();
+                            TimeSpan interval = new TimeSpan(4, 0, 0);
+
+                            //Check if the two sections are more than 4 hours apart.
+                            if (duration > interval)
+                            {
+                                sum += 0.5;
+                            }
+                        }
+
+
+                    }
+
+                }
+            }
+
+            //Check the constraints between a section of SLA100 and SLA191
+            if(currentActivity.Key.Equals("SLA100A") || currentActivity.Key.Equals("SLA100B") || currentActivity.Key.Equals("SLA191A") || currentActivity.Key.Equals("SLA191B"))
+            {
+                foreach(var comparingActivity in individualSchedule.listOfActivityAssignments)
+                {
+                    if((currentActivity.Key.Equals("SLA100A") || currentActivity.Key.Equals("SLA100B")) && (comparingActivity.Key.Equals("SLA191A") || comparingActivity.Key.Equals("SLA191B")))
+                    {
+                        string time1 = currentActivity.Value.Item2;
+                        string time2 = comparingActivity.Value.Item2;
+
+                        //Calculate the time between the two activities.
+                        TimeSpan duration = DateTime.Parse(time1).Subtract(DateTime.Parse(time2));
+
+                        //Get the absolute value of the time.
+                        duration = duration.Duration();
+
+                        //Check if a section of SLA100 and SLA191 are in the same time slot
+                        if (time1.Equals(time2))
+                        {
+                            sum -= 0.25;
+                        
+                        //Check if the activities are in consecutive time slots
+                        }else if (duration.ToString().Equals("01:00:00"))
+                        {
+                            //Check if one of the activities is in Roman and the other one is in Beach.
+                            if((currentActivity.Value.Item1.Key.Equals("Roman") && comparingActivity.Value.Item1.Key.Equals("Beach"))
+                                || (currentActivity.Value.Item1.Key.Equals("Beach") && comparingActivity.Value.Item1.Key.Equals("Roman")))
+                            {
+                                sum += 0.5;
+                            }
+                            else
+                            {
+                                sum -= 0.4;
+                            }
+                        //Check if the activities are separated by 1 hour.
+                        }else if (duration.ToString().Equals("02:00:00"))
+                        {
+                            sum += 0.25;
+                        }
+
+                    }
+                }
+            }
+
+            //Console.WriteLine("The sum of the CheckActivitySpecificAdjustments function is: " + sum);
+
             return sum;
         }
 
