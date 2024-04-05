@@ -46,8 +46,12 @@ namespace Program2
                 //Check on the facilitator load.
                 activityFitness += CheckFacilitatorLoad(activity);
 
-                //Check the criteria in the activity-specific adjustments section
-                activityFitness += CheckActivitySpecificAdjustments(activity);
+                //Check the criteria in the activity-specific adjustments section. This only applies to SLA100A and B , and SLA191A and B.
+                if(activity.Key.Equals("SLA100A") || activity.Key.Equals("SLA100B") || activity.Key.Equals("SLA191A") || activity.Key.Equals("SLA191B"))
+                {
+                    activityFitness += CheckActivitySpecificAdjustments(activity);
+                }
+                
                 Fitness += activityFitness;
             }
 
@@ -56,7 +60,7 @@ namespace Program2
         }
 
         /**
-         * Function for checking that each activity does not have a conflicitng room and time with another activity. 
+         * Method for checking that each activity does not have a conflicitng room and time with another activity. 
          */
         private double CheckForConflictingRoomAndTime(KeyValuePair<string, Tuple<KeyValuePair<string,int>, string, string>> currentActivity)
         {
@@ -80,7 +84,7 @@ namespace Program2
         }
 
         /**
-         * Function for checking that the room for the activity is of reasonable size.
+         * Method for checking that the room for the activity is of reasonable size.
          */
         private double CheckRoomSize(KeyValuePair<string, Tuple<KeyValuePair<string, int>, string, string>> currentActivity)
         {
@@ -188,6 +192,9 @@ namespace Program2
             return sum;
         }
 
+        /**
+         * Method for checking if each activity is assigned to a preferred facilitator.
+         */
         private double CheckFacilitator(KeyValuePair<string, Tuple<KeyValuePair<string, int>, string, string>> currentActivity)
         {
             double sum = 0;
@@ -319,11 +326,23 @@ namespace Program2
             return sum;
         }
 
+
+        /**
+         *  Method for checking the constraints on each facilitator assignment. 
+         */
         private double CheckFacilitatorLoad(KeyValuePair<string, Tuple<KeyValuePair<string, int>, string, string>> currentActivity)
         {
             double sum = 0;
             int activityCount = 1;
+            int drTylersActivities = 0;
             bool onlyOneActivityAtAGivenTime = true;
+
+            //Keep track of the number of activities that Dr Tyler is assigned to
+            if (currentActivity.Value.Item3.Equals("Tyler"))
+            {
+                drTylersActivities++;
+            }
+
             foreach(var comparingActivity in individualSchedule.listOfActivityAssignments)
             {
                 
@@ -335,9 +354,15 @@ namespace Program2
                         onlyOneActivityAtAGivenTime = false;
                     }
 
+                    //For every activity that the facilitator teaches, increase activityCount by 1.
                     if (currentActivity.Value.Item3.Equals(comparingActivity.Value.Item3))
                     {
                         activityCount++;
+                    }
+
+                    if(comparingActivity.Value.Item3.Equals("Tyler"))
+                    {
+                        drTylersActivities++;
                     }
 
                     //Checking if the faciliator is assigned to consecutive time slots.
@@ -352,7 +377,8 @@ namespace Program2
                     if (duration.ToString().Equals("01:00:00") && currentActivity.Value.Item3.Equals(comparingActivity.Value.Item3))
                     {
                         if((currentActivity.Value.Item1.Key.Equals("Roman") && comparingActivity.Value.Item1.Key.Equals("Beach"))
-                           || (currentActivity.Value.Item1.Key.Equals("Beach") && comparingActivity.Value.Item1.Key.Equals("Roman")))
+                           || (currentActivity.Value.Item1.Key.Equals("Beach") && comparingActivity.Value.Item1.Key.Equals("Roman"))
+                           || (currentActivity.Value.Item1.Key.Equals(comparingActivity.Value.Item1.Key)))
                         {
                             sum += 0.5;
                         }
@@ -381,10 +407,18 @@ namespace Program2
                 sum -= 0.2;
             }
 
+            if(drTylersActivities > 2)
+            {
+                sum -= 0.4;
+            }
+
             //Console.WriteLine(sum);
             return sum;
         }
 
+        /*
+         *  Method for checking each of the constraints under the Activity-specific adjustments. 
+        */
         private double CheckActivitySpecificAdjustments(KeyValuePair<string, Tuple<KeyValuePair<string, int>, string, string>> currentActivity)
         {
             double sum = 0;
@@ -452,9 +486,10 @@ namespace Program2
                         //Check if the activities are in consecutive time slots
                         }else if (duration.ToString().Equals("01:00:00"))
                         {
-                            //Check if one of the activities is in Roman and the other one is in Beach.
+                            //Check if one of the activities is in Roman and the other one is in Beach. Or if both are in the same building.
                             if((currentActivity.Value.Item1.Key.Equals("Roman") && comparingActivity.Value.Item1.Key.Equals("Beach"))
-                                || (currentActivity.Value.Item1.Key.Equals("Beach") && comparingActivity.Value.Item1.Key.Equals("Roman")))
+                                || (currentActivity.Value.Item1.Key.Equals("Beach") && comparingActivity.Value.Item1.Key.Equals("Roman"))
+                                || (currentActivity.Value.Item1.Key.Equals(comparingActivity.Value.Item1.Key)))
                             {
                                 sum += 0.5;
                             }

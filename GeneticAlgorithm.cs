@@ -13,19 +13,28 @@ namespace Program2
         //This will represent our population
         public List<Schedule> PopulationOfSchedules { get; set; }
 
+        //Current generation number.
         public int Generation { get; set; }
 
+        //Current mutation rate
         public double MutationRate { get; set; }
 
+        
         public double BestFitness { get; set; }
+
+        //Average fitness for the current generation.
         public double GenerationAverageFitness {  get; set; }
 
+        //The average fitness for the 100th generation.
         public double AverageFitnessOfGen100 { get; set; }
 
+        //The Schedule with the best fitness for the current generation
         public Schedule BestSchedule { get; set; }
 
+        //Array to store the probability distribution of each schedule's fitness score.
         public double[] ProbabilityDistribution { get; set; }
 
+        //Flag variable to determine when the algorithm can stop running.
         public bool CanStopRunningAlgorithm { get; set; } = false;
 
         Random rand;
@@ -50,6 +59,9 @@ namespace Program2
           
         }
 
+        /*
+         * The core features of the genetic algorithm all take place within this method.
+         */
         public void NewGeneration()
         {
             if(PopulationOfSchedules.Count  <= 0)
@@ -92,6 +104,9 @@ namespace Program2
            
         }
 
+        /*
+         *  Method for calculating the average fitness for the current generation. 
+        */
         private void CalculateAverageGenerationFitness()
         {
             Schedule bestSchedule = PopulationOfSchedules[0];
@@ -125,6 +140,7 @@ namespace Program2
                 AverageFitnessOfGen100 = currentGenerationFitness;
             }
 
+            //If we are past the 100th generation check if the improvement in average fitness is less than 1% improvement over the 100th generation.
             if(Generation > 100)
             {
                 if ((currentGenerationFitness - AverageFitnessOfGen100) > 0 && ((currentGenerationFitness - AverageFitnessOfGen100) / (AverageFitnessOfGen100 * 100)) < 0.01)
@@ -138,6 +154,9 @@ namespace Program2
 
         }
 
+        /*
+         * Method for eliminating the least fit schedule.
+        */
         private void EliminateLeastFitIndividual()
         {
             for(int i = 0; i < PopulationOfSchedules.Count; i++)
@@ -148,7 +167,7 @@ namespace Program2
             //Convert the Fitness Scores to a probability distribution
             ProbabilityDistribution = Accord.Math.Special.Softmax(ProbabilityDistribution);
 
-            List<double> probabilityDistList = new List<double>(ProbabilityDistribution);
+            //List<double> probabilityDistList = new List<double>(ProbabilityDistribution);
 
             //Find the smallest value in the probability distribution array.
             double minValue = ProbabilityDistribution[0];
@@ -169,13 +188,16 @@ namespace Program2
             Schedule leastFitSchedule = PopulationOfSchedules[indexOfMinValue];
 
 
-            //There may be multiple schedules that have the same score, so remove all of them.
+            //There may be multiple schedules that are the same, so remove all of them.
             PopulationOfSchedules.RemoveAll(schedule => schedule.Equals(leastFitSchedule));
 
             //Console.WriteLine(PopulationOfSchedules.Count);
 
         }
 
+        /*
+         *  Method for selecting parents. 
+        */
         private Schedule ChooseParent()
         {
             /*
@@ -197,6 +219,9 @@ namespace Program2
             return null;
         }
 
+        /*
+         *  Method for producting offspring. 
+        */
         private Schedule Crossover(Schedule parent1, Schedule parent2)
         {
             Schedule child = new Schedule(rand, shouldInitSchedule: false);
@@ -241,8 +266,12 @@ namespace Program2
 
         }
 
+        /*
+         *  Method for mutating a child's gene 
+        */
         private void Mutate(Schedule child)
         {
+            //Generate a random number between 0 and 1. If MutationRate is greater than r, cause a mutation.
             double r = rand.NextDouble();
 
             if(r < MutationRate)

@@ -23,7 +23,7 @@ namespace Program2
         //Array for storing the names of the facilitators.
         public string[] facilitators { get; } = { "Lock", "Glen", "Banks", "Richards", "Shaw", "Singer", "Uther", "Tyler", "Numen", "Zeldin" };
 
-        //This array will store key value pairs, the activity will be the key and the room, time and facilitator will be the value.
+        //This dictionary will store key value pairs, the activity will be the key and the room, time and facilitator will be the value.
         public Dictionary<string, Tuple<KeyValuePair<string, int>, string, string>> listOfActivityAssignments  { get; set; }
 
         Random random;
@@ -48,6 +48,9 @@ namespace Program2
 
         }
 
+        /**
+         *  Method for randomly generating a room, time, and faciliator for an activity. 
+         */
         public Tuple<KeyValuePair<string, int>, string, string> generateRandomActivityAssignment()
         {
             int randomRoomIndex = random.Next(9);

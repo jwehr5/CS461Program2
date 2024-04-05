@@ -1,9 +1,12 @@
-﻿using System;
+﻿using Accord.Math.Geometry;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace Program2
 {
@@ -26,7 +29,8 @@ namespace Program2
             Console.WriteLine(s.Fitness);
             */
 
-           
+            
+        
 
             GeneticAlgorithm ga = new GeneticAlgorithm(random);
             int runs = 0;
@@ -36,13 +40,32 @@ namespace Program2
                 runs++;
             }
 
-            Console.WriteLine(ga.Generation);
+            Console.WriteLine("Generation No: " + ga.Generation);
+            Console.WriteLine("Population Count: " + ga.PopulationOfSchedules.Count);
 
             foreach (var entry in ga.BestSchedule.individualSchedule.listOfActivityAssignments)
             {
                 Console.WriteLine(entry.Key);
                 Console.WriteLine(entry.Value);
                 Console.WriteLine();
+            }
+
+
+            //Output the schedule to a file
+            string workingDirectory = Environment.CurrentDirectory;
+            string projectDirectory = Directory.GetParent(workingDirectory).Parent.FullName;
+
+            using (StreamWriter outputFile = new StreamWriter(Path.Combine(projectDirectory, "Schedule.txt")))
+            {
+                foreach (var entry in ga.BestSchedule.individualSchedule.listOfActivityAssignments)
+                {
+                    outputFile.WriteLine(entry.Key);
+                    outputFile.WriteLine("  " + "Room: " + entry.Value.Item1.Key);
+                    outputFile.WriteLine("  " + "Time: " + entry.Value.Item2);
+                    outputFile.WriteLine("  " + "Facilitator: " + entry.Value.Item3);
+                    outputFile.WriteLine();
+                }
+
             }
 
 
