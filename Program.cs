@@ -41,12 +41,14 @@ namespace Program2
             }
 
             Console.WriteLine("Generation No: " + ga.Generation);
-            Console.WriteLine("Population Count: " + ga.PopulationOfSchedules.Count);
+            //Console.WriteLine("Population Count: " + ga.PopulationOfSchedules.Count);
 
             foreach (var entry in ga.BestSchedule.individualSchedule.listOfActivityAssignments)
             {
                 Console.WriteLine(entry.Key);
-                Console.WriteLine(entry.Value);
+                Console.WriteLine("  " + "Room: " + entry.Value.Item1.Key);
+                Console.WriteLine("  " + "Time: " + entry.Value.Item2);
+                Console.WriteLine("  " + "Facilitator: " + entry.Value.Item3);
                 Console.WriteLine();
             }
 
@@ -68,7 +70,7 @@ namespace Program2
 
             }
 
-
+            //Door stop to prevent the program from closing automatically.
             Console.ReadLine();
         }
     }

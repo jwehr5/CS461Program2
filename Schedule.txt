@@ -1,55 +1,55 @@
 SLA100A
   Room: Beach 201
-  Time: 2PM
+  Time: 3PM
   Facilitator: Lock
 
 SLA100B
-  Room: Loft 206
-  Time: 1PM
+  Room: Loft 310
+  Time: 11AM
   Facilitator: Numen
 
 SLA191A
-  Room: Loft 310
-  Time: 11AM
-  Facilitator: Glen
-
-SLA191B
   Room: Beach 201
-  Time: 3PM
+  Time: 2PM
   Facilitator: Lock
 
+SLA191B
+  Room: Roman 201
+  Time: 1PM
+  Facilitator: Glen
+
 SLA201
-  Room: Loft 206
+  Room: Beach 301
   Time: 10AM
-  Facilitator: Numen
+  Facilitator: Glen
 
 SLA291
   Room: Frank 119
-  Time: 11AM
-  Facilitator: Banks
-
-SLA303
-  Room: Beach 301
-  Time: 3PM
+  Time: 2PM
   Facilitator: Numen
 
-SLA304
-  Room: Roman 216
+SLA303
+  Room: Loft 310
   Time: 2PM
-  Facilitator: Shaw
+  Facilitator: Zeldin
+
+SLA304
+  Room: Loft 206
+  Time: 3PM
+  Facilitator: Uther
 
 SLA394
   Room: Frank 119
-  Time: 10AM
-  Facilitator: Shaw
-
-SLA449
-  Room: Beach 301
-  Time: 1PM
+  Time: 3PM
   Facilitator: Zeldin
 
+SLA449
+  Room: Beach 201
+  Time: 12PM
+  Facilitator: Singer
+
 SLA451
-  Room: Loft 310
+  Room: Beach 201
   Time: 1PM
-  Facilitator: Tyler
+  Facilitator: Singer
 
